@@ -8,9 +8,8 @@ int main(void)
     pwmFreq(10000);
 
     pinMode(PIN_2, PIN_DOUT);
+    pinMode(PIN_3, PIN_DOUT);
 
-    pinMode(PIN_14, PIN_PWM);
-    pwmWrite(PIN_14, 32768);
 
     uint32_t previous = millis();
 
@@ -19,6 +18,7 @@ int main(void)
             previous = millis();
 
             digitalToggle(PIN_2);
+            digitalToggle(PIN_3);
         }
     }
 

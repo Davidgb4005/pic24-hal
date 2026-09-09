@@ -576,3 +576,32 @@ void __attribute__((interrupt, no_auto_psv)) _U2TXInterrupt(void)
 {
     uart_tx_isr(UART_2);
 }
+void reverse_string(char *buffer)
+{
+    uint16_t eos = 0;
+
+    while (buffer[eos] != '\0') {
+        eos++;
+    }
+    uint16_t limit = eos/2;
+    for (uint16_t i = 0; i < limit; i++) {
+        char temp = buffer[eos - 1 - i];
+        buffer[eos - 1 - i] = buffer[i];
+        buffer[i] = temp;
+    }
+}
+
+void int_to_str(uint16_t value, char *buffer)
+{
+    int i = 0;
+
+    do {
+        buffer[i] = '0' + (value % 10);
+        value /= 10;
+        i++;
+    } while (value > 0);
+
+    buffer[i] = '\0';
+
+    reverse_string(buffer);
+}

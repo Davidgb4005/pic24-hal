@@ -41,5 +41,5 @@ uint16_t uartRead(uart_t uart, uint8_t *data, uint16_t max_length);
 void uartFlushRx(uart_t uart);
 bool uartRxOverflow(uart_t uart);
 void uartClearRxOverflow(uart_t uart);
-
+void int_to_str(uint16_t value,char * buffer);
 #endif
