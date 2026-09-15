@@ -1,13 +1,13 @@
 #include <xc.h>
 #include "device.h"
 #include "stdint.h"
-#include "lab1.h"
+#include "timer.h"
 typedef struct{
     volatile uint16_t *tris;
     volatile uint16_t *port;
     volatile uint16_t *lat;
     volatile uint16_t *odc;
-    volatile uint16_t *cnp;
+    volatile uint16_t *cnp; //<---- this should be removable superceded by cn_reg_t
 }gpio_reg_t;
 
 typedef struct{
@@ -15,6 +15,18 @@ typedef struct{
     volatile uint16_t *cnpu;
     volatile uint16_t *cnpd;
 }cn_reg_t;
+
+typedef struct{
+	uint16_t pin_number;
+	uint16_t cur_state;
+	uint16_t prev_state;
+	uint16_t debounce_state;
+	uint32_t debounce_time; // the systime for when debounce elaspes and goes sets output -> 1
+	uint16_t debounce_delay; // how long the debounce samples
+	uint16_t output;
+	edge_type_t edge_type;
+}pin_state_t;	
+
 
 
 typedef struct{
@@ -120,3 +132,64 @@ void digitalWrite(uint16_t pin,uint16_t value){
     }
 }
 
+void oneshotUpdate(pin_state_t * pin_state){
+	pin_state->cur_state = digitalRead(pin_state->pin_number);
+	if (pin_state->output){
+		pin_state->debounce_time = millis();
+		return
+		}
+
+
+	switch(pin_state->edge_type){
+		case DEBOUNCE:
+
+			if(!pin_state->cur_state){
+				pin_state->debounce_time = millis();
+			}
+
+			if ((millis()-pin_state->debounce_time)>pin_state->debounce_delay){
+				pin_state->output = 1;
+			}
+			break;
+		case RISING_EDGE:
+			if(pin_state->cur_state && !pin_state->prev_state){
+				pin_state->output = 1;
+			}
+			break;
+		case FALLING_EDGE:
+			if(!pin_state->cur_state && pin_state->prev_state){
+				pin_state->output = 1;
+			}
+			break;
+		case BOTH_EDGE:
+			if((!pin_state->cur_state && pin_state->prev_state) || (pin_state->cur_state && !pin_state->prev_state)){
+				pin_state->output = 1;
+			}
+			break;
+		}
+}
+
+uint16_t oneshotRead(pin_state_t * pin_state,read_type_t read_type){
+	if (pin_state->output){
+		switch(read_type){
+		case CONSUME:
+			pin_state->output = 0;
+			return 1;
+		
+		case READ:
+			return 1;
+
+		case RESET:
+			pin_state->output = 0;
+			return 0;
+
+	}
+		return 0;
+
+
+
+
+
+
+
+}

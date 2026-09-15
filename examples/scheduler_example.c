@@ -46,7 +46,7 @@ void function_2(void *my_parameters)
     uint32_t previous = millis();
     (void)my_parameters;
     while (1) {
-            digitalWrite(PIN_2, );
+            digitalWrite(PIN_2,HIGH );
             digitalWrite(PIN_3,LOW);
         }
     
@@ -56,6 +56,7 @@ int main(){
     timerTimebaseInit();
     pinMode(PIN_2, PIN_DOUT);
     pinMode(PIN_3, PIN_DOUT);
+
     uint16_t parameters_a = 0;
     uint16_t parameters_b = 0;
     register_task(&taskA,function_1,&parameters_a,stack_a,128);
@@ -64,6 +65,7 @@ int main(){
     timer3_init();
 
     while (1) {
+
     }
     return 0;
 }
