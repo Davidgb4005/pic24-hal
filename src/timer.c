@@ -114,7 +114,6 @@ hal_status_t pwmFreq(uint32_t frequency_hz)
             IFS0bits.T2IF = 0;
             IEC0bits.T2IE = 0;
             T2CONbits.TON = 1;
-            pinPwmTimebaseChanged();
 
             return HAL_OK;
         }
