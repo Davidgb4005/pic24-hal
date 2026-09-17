@@ -89,40 +89,4 @@ uint32_t micros(void)
     return timer_ticks_to_us(timer1_ticks_snapshot(), timer1_prescaler);
 }
 
-hal_status_t pwmFreq(uint32_t frequency_hz)
-{
-    uint8_t index;
 
-    if (frequency_hz == 0u) {
-        return HAL_UNSUPPORTED;
-    }
-
-    for (index = 0u; index < (uint8_t)(sizeof(timer_prescalers) / sizeof(timer_prescalers[0])); index++) {
-        uint32_t ticks = (uint32_t)(HAL_FCY / ((uint64_t)timer_prescalers[index].divisor * frequency_hz));
-
-        if ((ticks > 0u) && (ticks <= ((uint32_t)TIMER_PERIOD_MAX + 1u))) {
-            pwm_period = (uint16_t)(ticks - 1u);
-
-            PMD1bits.T2MD = 0;
-            T2CONbits.TON = 0;
-            T2CONbits.TCS = 0;
-            T2CONbits.T32 = 0;
-            T2CONbits.TGATE = 0;
-            T2CONbits.TCKPS = timer_prescalers[index].bits;
-            PR2 = pwm_period;
-            TMR2 = 0;
-            IFS0bits.T2IF = 0;
-            IEC0bits.T2IE = 0;
-            T2CONbits.TON = 1;
-
-            return HAL_OK;
-        }
-    }
-
-    return HAL_UNSUPPORTED;
-}
-
-uint16_t pwmGetPeriod(void)
-{
-    return pwm_period;
-}

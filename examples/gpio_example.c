@@ -1,4 +1,4 @@
-#include "lab1.h"
+#include "gpio.h"
 #include "stdint.h"
 #include <xc.h>
 #include "timer.h"

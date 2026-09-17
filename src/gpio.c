@@ -2,7 +2,7 @@
 #include "device.h"
 #include "stdint.h"
 #include "timer.h"
-#include "lab1.h"
+#include "gpio.h"
 typedef struct{
     volatile uint16_t *tris;
     volatile uint16_t *port;
