@@ -1,29 +1,59 @@
-#include "uart.h"
-#include "timer.h"
-#include "pin.h"
+#include "bare_uart.h"
+#include "string.h"
+#include "gpio.h"
+#include "xc.h"
+#pragma config FWDTEN = OFF
+uint16_t reset_cause;
+
 int main(void)
 {
-    uart_config_t config = {
-        .baud_rate = 9600
-    };
+    RCONbits.SWDTEN = 0;
+    pinMode(12, OUTPUT);
+    char buffer[32];
+    const char *my_word = "Hello World";
+    strcpy(buffer, my_word);
+    uart_init(9600);
+    uart_send_string("UART ready\r\n");
+    uint16_t msg_here = 0;
+    int i = 0;
 
-    uartInit(UART_1, PIN_11, PIN_6, &config);
-    uartPrint(UART_1, "UART ready\r\n");
-    pinMode(PIN_2,PIN_DIN_PULLUP);
-int ons = 0;
-    while (1) {
-        uint8_t byte;
-	if (digitalRead(PIN_2) && !ons){
-		uartPrint(UART_1,"BUTTON PRESSED\r\n");
-		ons = 1;
-	}
-	
-	else if (!digitalRead(PIN_2) && ons){
-		ons = 0;
-	}
+    // digitalWrite(12,1);
+    while (1)
+    {
+        __builtin_clrwdt(); //<- kick dog
+        if (uart_available)
+        {
+            char c = uart_recv_char(1);
+            while ((c != '\r') && (c != '\n'))
+            {
+                buffer[i] = c;
+                i++;
+                c = uart_recv_char(1);
+                digitalWrite(12, 1);
+            }
+            uart_send_char('\r');
+            uart_send_char('\n');
+            buffer[i] = '\0';
+            msg_here = 1;
+            i = 0;
+        }
 
-        if (uartReadByte(UART_1, &byte)) {
-            uartWriteByte(UART_1, byte+1);
+        if (msg_here)
+        {
+            if (!strcmp(buffer, "debug")){
+                debug_print(1);
+            }
+            if (!strcmp(buffer, "password"))
+            {
+                uart_send_string("Correct Password\r\n");
+            }
+            else
+            {
+                uart_send_string("Incorrect Password\r\n");
+            }
+            uart_send_string(">");
+            msg_here = 0;
+            digitalWrite(12, 0);
         }
     }
 
